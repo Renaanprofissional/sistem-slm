@@ -10,5 +10,5 @@ app.use(express.json());
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/nf", nfRouter);
 
-const PORT = process.env.PORT ?? 3333;
-app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));
+// 🚨 Importante: NÃO usar app.listen() na Vercel
+export default app;
