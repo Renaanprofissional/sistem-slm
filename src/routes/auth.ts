@@ -6,7 +6,7 @@ const authRouter = Router();
 // Usuários fixos (4 pessoas)
 const users = [
   { username: "renan", password: "@salome2025" },
-  { username: "erick", password: "@salome2025    " },
+  { username: "erick", password: "@salome2025" },
   { username: "bruna", password: "@salome2025" },
   { username: "caue", password: "@salome2025" },
 ];
