@@ -1,10 +1,9 @@
 import { Router } from "express";
 import multer from "multer";
 import xlsx from "xlsx";
-import fs from "fs";
 import { drive } from "../lib/drive";
 
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ storage: multer.memoryStorage() });
 export const nfRouter = Router();
 
 const SOURCE_FOLDER = process.env.DRIVE_SOURCE_FOLDER_ID!;
@@ -32,7 +31,8 @@ nfRouter.post("/process-sheet", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "Nenhuma planilha enviada" });
     }
 
-    const workbook = xlsx.readFile(req.file.path);
+    // lê diretamente do buffer
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
 
@@ -54,7 +54,6 @@ nfRouter.post("/process-sheet", upload.single("file"), async (req, res) => {
         continue;
       }
 
-      // verifica se o arquivo ainda está na pasta SOURCE
       if (!file.parents?.includes(SOURCE_FOLDER)) {
         skipped.push(fileName);
         continue;
@@ -63,8 +62,6 @@ nfRouter.post("/process-sheet", upload.single("file"), async (req, res) => {
       await moveFile(file.id!);
       moved.push(fileName);
     }
-
-    fs.unlinkSync(req.file.path);
 
     return res.json({ moved, skipped, notFound });
   } catch (err) {
