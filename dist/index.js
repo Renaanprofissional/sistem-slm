@@ -7,13 +7,17 @@ require("dotenv/config");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const nf_1 = require("./routes/nf");
+const auth_1 = require("./routes/auth"); // novo
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/nf", nf_1.nfRouter);
-app.get("/", (_req, res) => {
-    res.json({ message: "API rodando 🚀", docs: "/health e /api/nf" });
+app.use("/api/auth", auth_1.authRouter); // rota de login
+// exemplo de rota protegida
+const auth_2 = require("./middleware/auth");
+app.get("/api/secure", auth_2.authMiddleware, (_req, res) => {
+    res.json({ secret: "Só quem tem token consegue ver isso 🚀" });
 });
-// 🚨 Importante: NÃO usar app.listen() na Vercel
-exports.default = app;
+const PORT = process.env.PORT ?? 3333;
+app.listen(PORT, () => console.log(`API rodando em http://localhost:${PORT}`));

@@ -7,9 +7,8 @@ exports.nfRouter = void 0;
 const express_1 = require("express");
 const multer_1 = __importDefault(require("multer"));
 const xlsx_1 = __importDefault(require("xlsx"));
-const fs_1 = __importDefault(require("fs"));
 const drive_1 = require("../lib/drive");
-const upload = (0, multer_1.default)({ dest: "uploads/" });
+const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
 exports.nfRouter = (0, express_1.Router)();
 const SOURCE_FOLDER = process.env.DRIVE_SOURCE_FOLDER_ID;
 const DEST_FOLDER = process.env.DRIVE_DEST_FOLDER_ID;
@@ -32,7 +31,8 @@ exports.nfRouter.post("/process-sheet", upload.single("file"), async (req, res) 
         if (!req.file) {
             return res.status(400).json({ error: "Nenhuma planilha enviada" });
         }
-        const workbook = xlsx_1.default.readFile(req.file.path);
+        // lê diretamente do buffer
+        const workbook = xlsx_1.default.read(req.file.buffer, { type: "buffer" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = xlsx_1.default.utils.sheet_to_json(sheet);
         const nfNumbers = data
@@ -49,7 +49,6 @@ exports.nfRouter.post("/process-sheet", upload.single("file"), async (req, res) 
                 notFound.push(fileName);
                 continue;
             }
-            // verifica se o arquivo ainda está na pasta SOURCE
             if (!file.parents?.includes(SOURCE_FOLDER)) {
                 skipped.push(fileName);
                 continue;
@@ -57,7 +56,6 @@ exports.nfRouter.post("/process-sheet", upload.single("file"), async (req, res) 
             await moveFile(file.id);
             moved.push(fileName);
         }
-        fs_1.default.unlinkSync(req.file.path);
         return res.json({ moved, skipped, notFound });
     }
     catch (err) {

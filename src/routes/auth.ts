@@ -5,10 +5,10 @@ const authRouter = Router();
 
 // Usuários fixos (4 pessoas)
 const users = [
-  { username: "renan", password: "@salome2025" },
-  { username: "erick", password: "@salome2025" },
-  { username: "bruna", password: "@salome2025" },
-  { username: "caue", password: "@salome2025" },
+  { username: "renan", password: "@Renan2025" },
+  { username: "erick", password: "@erick2025" },
+  { username: "bruna", password: "@bruna2025" },
+  { username: "caue", password: "@caue2025" },
 ];
 
 authRouter.post("/login", (req, res) => {
